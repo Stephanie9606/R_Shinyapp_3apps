@@ -26,8 +26,8 @@ ui <- fluidPage(
     tabsetPanel(type = "pills",
                 tabPanel("Univariate",
                   varSelectInput("var1", "Variable?", data = estate),
-                  checkboxInput("Log1", "Log_Transform?"), 
-                  sliderInput("num1", "Number of Bins?", value = 40, min = 1, max = 100),
+                  checkboxInput("log1", "Log_Transform?"), 
+                  sliderInput("bins", "Number of Bins?", value = 40, min = 1, max = 100),
                   numericInput("num2", "Null Value", value = 0),
                   verbatimTextOutput("code")
                 ),
@@ -49,8 +49,11 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
+  
+  attach(estate)
+  
   output$code <- renderPrint({
-    summary(t.test(estate$`!!input$var1`))
+    t.test(estate[[input$var1]], null.value = input$num2)
   })
   
   output$dynamic <- renderDataTable({
@@ -59,7 +62,7 @@ server <- function(input, output, session) {
   
   output$plot <- renderPlot({
     ggplot(estate, aes(x = !!input$var1)) +
-      geom_histogram()
+      geom_histogram(bins = input$bins)
   })
 }
 
