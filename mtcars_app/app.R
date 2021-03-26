@@ -12,6 +12,11 @@ ui <- fluidPage(
 
 server <- function(input, output) {
     
+    # reactive ggplot
+    p <- reactive({
+        ggplot(mtcars, aes(x = !!input$var1))
+    })
+    
 }
 
 shinyApp(ui = ui, server = server)
