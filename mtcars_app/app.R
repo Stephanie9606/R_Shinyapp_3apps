@@ -12,9 +12,24 @@ ui <- fluidPage(
 
 server <- function(input, output) {
     
+    # plotType
+    plotType <- function(x, type) {
+        switch(input$plottype,
+               "Density Plot" = geom_density(x, outline.type = "full"),
+               "Histogram" = geom_histogram(x),
+               "Frequency Polygon" = geom_freqpoly(x))
+    }
+    
     # reactive ggplot
     p <- reactive({
         ggplot(mtcars, aes(x = !!input$var1))
+    })
+    
+    # plot
+    output$plot <- renderPlot({
+        p() +
+            plotType(input$plotType) +
+            theme_bw()
     })
     
 }
