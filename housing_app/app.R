@@ -2,6 +2,7 @@
 
 library(readr)
 library(tidyverse)
+library(ggplot2)
 
 estate <- readr::read_csv("./data/estate.csv",
                           col_types = cols(
@@ -41,16 +42,24 @@ ui <- fluidPage(
                   dataTableOutput("dynamic")
                 )
     )
+  ),
+  sidebarPanel(
+    plotOutput("plot")
   )
 )
 
 server <- function(input, output, session) {
   output$code <- renderPrint({
-    t.test(estate)
+    summary(t.test(estate$`!!input$var1`))
   })
   
   output$dynamic <- renderDataTable({
     estate
+  })
+  
+  output$plot <- renderPlot({
+    ggplot(estate, aes(x = !!input$var1)) +
+      geom_histogram()
   })
 }
 
