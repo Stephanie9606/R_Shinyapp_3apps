@@ -10,14 +10,13 @@ estate <- readr::read_csv("./data/estate.csv",
                             Highway = col_factor()
                           ))
 estate %>% 
-  mutate(Price = Price/1000) ->
+  mutate(`Price($K)` = Price/1000) %>% 
+  select(`Price($K)`, everything(), -Price) ->
   estate
 
 readr::write_rds(estate,file = "./data/estate.rds" , compress = "gz")
 
 estate <- read_rds("./data/estate.rds")
-
-t.test(estate$Price)
 
 library(shiny)
 
@@ -47,7 +46,7 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   output$code <- renderPrint({
-    t.test(estate$Price)
+    t.test(estate)
   })
   
   output$dynamic <- renderDataTable({
