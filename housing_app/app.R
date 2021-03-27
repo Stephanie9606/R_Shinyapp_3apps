@@ -43,9 +43,9 @@ ui <- fluidPage(
                          sidebarLayout(
                            sidebarPanel(
                              varSelectInput("var2", "X Variable?", data = estate),
-                             checkboxInput("Log2", "Log_Transform?"), 
+                             checkboxInput("log2", "Log_Transform?"), 
                              varSelectInput("var3", "Y Variable?", data = estate),
-                             checkboxInput("Log3", "Log_Transform?"),
+                             checkboxInput("log3", "Log_Transform?"),
                              checkboxInput("ols", "Fit OLS?")
                            ),
                            mainPanel(
@@ -84,7 +84,7 @@ server <- function(input, output, session) {
   
   # plot
   output$plot1 <- renderPlot({
-    
+    # modularity
     p1 <- ggplot(estate, aes(x = !!input$var1))
     
     # if log
@@ -93,7 +93,7 @@ server <- function(input, output, session) {
         scale_x_log10()
     }
     
-    # if else numeric var
+    # if-else numeric var
     if(is.numeric(estate[[input$var1]])){
       p1 <- p1 +
         geom_histogram(bins = input$bins)
@@ -109,29 +109,24 @@ server <- function(input, output, session) {
     # modularity
     pp <- ggplot(data = estate, aes(x = !!input$var2, y = !!input$var3))
     
-    # if else numeric var
-     if(is.numeric(estate[[input$var2]]) && is.numeric(estate[[input$var3]])){
-       pp <- pp +
-         geom_point()
-     } else if (isTRUE(!!input$log2)){
-       pp <- pp +
-       scale_x_log10() }
-    # } else if (isTRUE(estate[[input$ols]])){
-    #   pp <- pp +
-    #     geom_smooth(method = "lm")
-    # }
-    # 
-    # if(is.factor(estate[[input$var2]]) && is.factor(estate[[input$var3]])){
-    #   pp <- pp +
-    #     geom_boxploth()
-    # }
-    # 
-    # if(is.factor(estate[[input$var2]]) && is.factor(estate[[input$var3]])){
-    #   pp <- pp +
-    #     geom_jitter()
-    # }
+    # if log x,y
+    if(isTRUE(input$log2)){
+      pp <- pp +
+        scale_x_log10()
+    }
     
-    # if else num/factor
+    if(isTRUE(input$log3)){
+      pp <- pp +
+        scale_y_log10()
+    }
+    
+    # if ols
+    if(isTRUE(input$log3)){
+      pp <- pp +
+        geom_smooth(method = "lm", se = FALSE)
+    }
+    
+    # if-else numeric/factor
     if(is.numeric(estate[[input$var2]]) && is.numeric(estate[[input$var3]])){
       pp <- pp +
         geom_point()
