@@ -22,31 +22,41 @@ estate <- read_rds("./data/estate.rds")
 library(shiny)
 
 ui <- fluidPage(
-  mainPanel(
-    tabsetPanel(type = "pills",
+  titlePanel("EDA of Estate Data"),
+  tabsetPanel(type = "pills",
                 tabPanel("Univariate",
-                  varSelectInput("var1", "Variable?", data = estate),
-                  checkboxInput("log1", "Log_Transform?", value = FALSE), 
-                  sliderInput("bins", "Number of Bins?", value = 40, min = 1, max = 100),
-                  numericInput("num2", "Null Value", value = 0),
-                  verbatimTextOutput("code")
+                         sidebarLayout(
+                           sidebarPanel(
+                             varSelectInput("var1", "Variable?", data = estate),
+                             checkboxInput("log1", "Log_Transform?", value = FALSE), 
+                             sliderInput("bins", "Number of Bins?", value = 40, min = 1, max = 100),
+                             numericInput("num2", "Null Value", value = 0),
+                             verbatimTextOutput("code")
+                           ),
+                           mainPanel(
+                             plotOutput("plot1")
+                           )
+                         )
                 ),
                 tabPanel("Bivariate",
-                  varSelectInput("var2", "X Variable?", data = estate),
-                  checkboxInput("Log2", "Log_Transform?"), 
-                  varSelectInput("var3", "Y Variable?", data = estate),
-                  checkboxInput("Log3", "Log_Transform?"),
-                  checkboxInput("OLS1", "Fit OLS?")
+                         sidebarLayout(
+                           sidebarPanel(
+                             varSelectInput("var2", "X Variable?", data = estate),
+                             checkboxInput("Log2", "Log_Transform?"), 
+                             varSelectInput("var3", "Y Variable?", data = estate),
+                             checkboxInput("Log3", "Log_Transform?"),
+                             checkboxInput("OLS1", "Fit OLS?")
+                           ),
+                           mainPanel(
+                             plotOutput("plot2")
+                           )
+                         )
                 ),
                 tabPanel("Spreadsheet",
                   dataTableOutput("dynamic")
                 )
     )
-  ),
-  sidebarPanel(
-    plotOutput("plot")
   )
-)
 
 server <- function(input, output, session) {
   
@@ -77,7 +87,7 @@ server <- function(input, output, session) {
   })
   
   # plot
-  output$plot <- renderPlot({
+  output$plot1 <- renderPlot({
     
     # new df
     est_newdf <- estate  
