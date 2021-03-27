@@ -3,6 +3,7 @@
 library(readr)
 library(tidyverse)
 library(ggplot2)
+library(ggstance)
 
 estate <- readr::read_csv("./data/estate.csv",
                           col_types = cols(
@@ -23,7 +24,7 @@ library(shiny)
 
 ui <- fluidPage(
   titlePanel("EDA of Estate Data"),
-  tabsetPanel(type = "pills",
+  tabsetPanel(type = "tabs",
                 tabPanel("Univariate",
                          sidebarLayout(
                            sidebarPanel(
@@ -45,7 +46,7 @@ ui <- fluidPage(
                              checkboxInput("Log2", "Log_Transform?"), 
                              varSelectInput("var3", "Y Variable?", data = estate),
                              checkboxInput("Log3", "Log_Transform?"),
-                             checkboxInput("OLS1", "Fit OLS?")
+                             checkboxInput("ols", "Fit OLS?")
                            ),
                            mainPanel(
                              plotOutput("plot2")
@@ -59,7 +60,7 @@ ui <- fluidPage(
   )
 
 server <- function(input, output, session) {
-  
+# First Tab
   output$code <- renderPrint({
     
    # new df
@@ -81,35 +82,74 @@ server <- function(input, output, session) {
     print(tout)
   })
   
-  # spreadsheet
-  output$dynamic <- renderDataTable({
-    estate
-  })
-  
   # plot
   output$plot1 <- renderPlot({
     
-    # new df
-    est_newdf <- estate  
+    p1 <- ggplot(estate, aes(x = !!input$var1))
     
+    # if log
     if(isTRUE(input$log1)){
-      est_newdf$ttvalue <- log(est_newdf[[as.character(input$var1)]])
-    }
-    
-    if(!isTRUE(input$log1)){
-      est_newdf$ttvalue <- est_newdf[[as.character(input$var1)]]
+      p1 <- p1 +
+        scale_x_log10()
     }
     
     # if else numeric var
-    if(is.numeric(est_newdf$ttvalue) == T){
-      ggplot(est_newdf, aes(x = ttvalue)) +
+    if(is.numeric(estate[[input$var1]])){
+      p1 <- p1 +
         geom_histogram(bins = input$bins)
-    } else{
-      ggplot(est_newdf, aes(x = ttvalue)) +
+    } else {
+      p1 <- p1 +
         geom_bar(bins = input$bins)
     }
-  
+    p1
   })
+  
+# Second Tab
+  output$plot2 <- renderPlot({
+    # modularity
+    pp <- ggplot(data = estate, aes(x = !!input$var2, y = !!input$var3))
+    
+    # if else numeric var
+     if(is.numeric(estate[[input$var2]]) && is.numeric(estate[[input$var3]])){
+       pp <- pp +
+         geom_point()
+     } else if (isTRUE(!!input$log2)){
+       pp <- pp +
+       scale_x_log10() }
+    # } else if (isTRUE(estate[[input$ols]])){
+    #   pp <- pp +
+    #     geom_smooth(method = "lm")
+    # }
+    # 
+    # if(is.factor(estate[[input$var2]]) && is.factor(estate[[input$var3]])){
+    #   pp <- pp +
+    #     geom_boxploth()
+    # }
+    # 
+    # if(is.factor(estate[[input$var2]]) && is.factor(estate[[input$var3]])){
+    #   pp <- pp +
+    #     geom_jitter()
+    # }
+    
+    # if else num/factor
+    if(is.numeric(estate[[input$var2]]) && is.numeric(estate[[input$var3]])){
+      pp <- pp +
+        geom_point()
+    } else if (is.factor(estate[[input$var2]]) && is.factor(estate[[input$var3]])){
+      pp <- pp +
+        geom_jitter()
+    } else {
+      pp <- pp +
+        geom_boxploth()
+    }
+
+    pp
+  })
+  
+# Third Tab
+  output$dynamic <- renderDataTable({
+    estate
+  })  
 }
 
 shinyApp(ui, server)
