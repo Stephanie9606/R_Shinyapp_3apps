@@ -4,6 +4,7 @@ library(readr)
 library(tidyverse)
 library(ggplot2)
 library(ggstance)
+library(broom)
 
 estate <- readr::read_csv("./data/estate.csv",
                           col_types = cols(
@@ -61,7 +62,7 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
 # First Tab
-  output$code <- renderPrint({
+  output$code <- renderTable({
     
    # new df
    est_newdf <- estate  
@@ -72,14 +73,21 @@ server <- function(input, output, session) {
     
    if(!isTRUE(input$log1)){
       est_newdf$ttvalue <- est_newdf[[as.character(input$var1)]]
+      
+      # validate
+      validate(
+        need(is.numeric(estate[[input$var1]]), "Variable is not numeric")
+      )
     }
     
-   # validate(
-   #   need(is.factor(est_newdf$ttvalue) == TRUE, "Variable is not numeric")
-   #  )
-   
-    tout <- t.test(est_newdf$ttvalue, null.value = input$num2)
-    print(tout)
+    tout <- t.test(est_newdf$ttvalue, mu = input$num2)
+    
+    # rentout <- c(round(tout$p.value, digits = 2), tout$estimate, tout$conf.int)
+    # rentout
+    
+    toutvalue <- tidy(tout)
+    
+    toutvalue
   })
   
   # plot
@@ -107,43 +115,53 @@ server <- function(input, output, session) {
 # Second Tab
   output$plot2 <- renderPlot({
     # modularity
-    pp <- ggplot(data = estate, aes(x = !!input$var2, y = !!input$var3))
+    p2 <- ggplot(data = estate, aes(x = !!input$var2, y = !!input$var3))
     
     # if log x,y
     if(isTRUE(input$log2)){
-      pp <- pp +
+      p2 <- p2 +
         scale_x_log10()
+      
+    # validate
+      validate(
+        need(is.numeric(estate[[input$var2]]), "Factor Variable Cannot Do Log_Transform!")
+      )
     }
     
     if(isTRUE(input$log3)){
-      pp <- pp +
+      p2 <- p2 +
         scale_y_log10()
+      
+      # validate
+      validate(
+        need(is.numeric(estate[[input$var3]]), "Factor Variable Cannot Do Log_Transform!")
+      )
     }
     
     # if ols
-    if(isTRUE(input$log3)){
-      pp <- pp +
+    if(isTRUE(input$ols)){
+      p2 <- p2 +
         geom_smooth(method = "lm", se = FALSE)
     }
     
     # if-else numeric/factor
     if(is.numeric(estate[[input$var2]]) && is.numeric(estate[[input$var3]])){
-      pp <- pp +
+      p2 <- p2 +
         geom_point()
     } else if (is.factor(estate[[input$var2]]) && is.factor(estate[[input$var3]])){
-      pp <- pp +
+      p2 <- p2 +
         geom_jitter()
     } else {
-      pp <- pp +
+      p2 <- p2 +
         geom_boxploth()
     }
-
-    pp
+    p2
   })
   
 # Third Tab
   output$dynamic <- renderDataTable({
-    estate
+    estate %>% 
+      map_dbl()
   })  
 }
 
