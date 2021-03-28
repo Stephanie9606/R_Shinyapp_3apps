@@ -8,6 +8,7 @@ estate <- readr::read_csv("./data/estate.csv",
                           col_types = cols(
                             AC = col_factor(),
                             Pool = col_factor(),
+                            Style = col_factor(),
                             Highway = col_factor()
                           ))
 estate %>% 
@@ -61,20 +62,19 @@ ui <- fluidPage(
 server <- function(input, output, session) {
 # First Tab
   output$ttestdf <- renderTable({
-    
-   # new df
-   est_newdf <- estate  
+    # new df
+    est_newdf <- estate  
       
-   if(isTRUE(input$log1)){
+    if(isTRUE(input$log1)){
       est_newdf$ttvalue <- log(est_newdf[[as.character(input$var1)]])
     }
     
-   if(!isTRUE(input$log1)){
+    if(!isTRUE(input$log1)){
       est_newdf$ttvalue <- est_newdf[[as.character(input$var1)]]
       
-      # validate
-      validate(
-        need(is.numeric(estate[[input$var1]]), "Variable is not numeric")
+    # validate
+    validate(
+      need(is.numeric(estate[[input$var1]]), "Variable is not numeric")
       )
     }
     
@@ -158,9 +158,9 @@ server <- function(input, output, session) {
   
 # Third Tab
   output$dynamic <- renderDataTable({
-    estate %>% 
-      map_dbl()
-  })  
+    est_onlynum <- estate[ , purrr::map_lgl(estate, is.numeric)]
+    est_onlynum
+  }, options = list(iDisplayLength = 10))
 }
 
 shinyApp(ui, server)
