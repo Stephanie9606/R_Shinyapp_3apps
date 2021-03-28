@@ -3,8 +3,6 @@
 library(readr)
 library(tidyverse)
 library(ggplot2)
-library(ggstance)
-library(broom)
 
 estate <- readr::read_csv("./data/estate.csv",
                           col_types = cols(
@@ -33,7 +31,7 @@ ui <- fluidPage(
                              checkboxInput("log1", "Log_Transform?", value = FALSE), 
                              sliderInput("bins", "Number of Bins?", value = 40, min = 1, max = 100),
                              numericInput("num2", "Null Value", value = 0),
-                             verbatimTextOutput("code")
+                             tableOutput("ttestdf")
                            ),
                            mainPanel(
                              plotOutput("plot1")
@@ -62,7 +60,7 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
 # First Tab
-  output$code <- renderTable({
+  output$ttestdf <- renderTable({
     
    # new df
    est_newdf <- estate  
@@ -82,11 +80,11 @@ server <- function(input, output, session) {
     
     tout <- t.test(est_newdf$ttvalue, mu = input$num2)
     
-    # rentout <- c(round(tout$p.value, digits = 2), tout$estimate, tout$conf.int)
-    # rentout
-    
-    toutvalue <- tidy(tout)
-    
+    ttidy <- broom::tidy(tout)
+     
+    ttidy %>% 
+      select("P-value" = p.value, "Estimate" = estimate, "95% Lower" = conf.low, "95% Upper" = conf.high) ->
+      toutvalue
     toutvalue
   })
   
@@ -153,7 +151,7 @@ server <- function(input, output, session) {
         geom_jitter()
     } else {
       p2 <- p2 +
-        geom_boxploth()
+        ggstance::geom_boxploth()
     }
     p2
   })
