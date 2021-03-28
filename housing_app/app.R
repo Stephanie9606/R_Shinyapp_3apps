@@ -24,6 +24,8 @@ library(shiny)
 
 ui <- fluidPage(
   titlePanel("EDA of Estate Data"),
+  # main space
+  fluidRow(
   tabsetPanel(type = "tabs",
                 tabPanel("Univariate",
                          sidebarLayout(
@@ -57,7 +59,14 @@ ui <- fluidPage(
                   dataTableOutput("dynamic")
                 )
     )
-  )
+  ),
+  # log ols space
+  fluidRow(column(4, verbatimTextOutput("slm")),
+           column(4, plotOutput("plot3")),
+           column(4, plotOutput("plot4"))
+           )
+)
+
 
 server <- function(input, output, session) {
 # First Tab
@@ -169,6 +178,18 @@ server <- function(input, output, session) {
     est_onlynum <- estate[ , purrr::map_lgl(estate, is.numeric)]
     est_onlynum
   }, options = list(iDisplayLength = 10))
+  
+# ols part
+# ols part: lm summary
+  output$slm <- renderPrint({
+    if(isTRUE(input$ols)){
+      lmout <- lm(estate[[input$var2]] ~ estate[[input$var3]])
+      summary(lmout)
+    }
+  })
+  
+  
+  
 }
 
 shinyApp(ui, server)
