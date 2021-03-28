@@ -101,7 +101,8 @@ server <- function(input, output, session) {
     # if log
     if(isTRUE(input$log1)){
       p1 <- p1 +
-        scale_x_log10()
+        scale_x_log10() +
+        labs(x = paste("Log(",input$var1,")"))
     }
     
     # if-else numeric var
@@ -123,7 +124,8 @@ server <- function(input, output, session) {
     # if log x,y
     if(isTRUE(input$log2)){
       p2 <- p2 +
-        scale_x_log10()
+        scale_x_log10() +
+        labs(x = paste("Log(",input$var2,")"))
       
     # validate
       validate(
@@ -133,7 +135,8 @@ server <- function(input, output, session) {
     
     if(isTRUE(input$log3)){
       p2 <- p2 +
-        scale_y_log10()
+        scale_y_log10() +
+        labs(x = paste("Log(",input$var3,")"))
       
       # validate
       validate(
@@ -154,7 +157,7 @@ server <- function(input, output, session) {
     } else if (is.factor(estate[[input$var2]]) && is.factor(estate[[input$var3]])){
       p2 <- p2 +
         geom_jitter()
-    } else {
+    } else{
       p2 <- p2 +
         ggstance::geom_boxploth()
     }
