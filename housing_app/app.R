@@ -61,31 +61,36 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
 # First Tab
+  # t.test table
   output$ttestdf <- renderTable({
-    # new df
-    est_newdf <- estate  
-      
-    if(isTRUE(input$log1)){
-      est_newdf$ttvalue <- log(est_newdf[[as.character(input$var1)]])
-    }
-    
-    if(!isTRUE(input$log1)){
-      est_newdf$ttvalue <- est_newdf[[as.character(input$var1)]]
-      
-    # validate
-    validate(
-      need(is.numeric(estate[[input$var1]]), "Variable is not numeric")
+    if(is.numeric(estate[[input$var1]])){
+      if(input$log1){
+        estate %>% 
+          select(input$var1) %>% 
+          log() %>% 
+          t.test(mu = input$num2) ->
+          tout
+        tout %>% 
+          broom::tidy() %>% 
+          select("P-value" = p.value, "Estimate" = estimate, "95% Lower" = conf.low, "95% Upper" = conf.high) ->
+          toutvalue
+        toutvalue
+      } else{
+        estate %>% 
+          select(input$var1) %>% 
+          t.test(mu = input$num2) ->
+          tout
+        tout %>% 
+          broom::tidy() %>% 
+          select("P-value" = p.value, "Estimate" = estimate, "95% Lower" = conf.low, "95% Upper" = conf.high) ->
+          toutvalue
+        toutvalue
+      }
+    } else{
+      validate(
+        need(is.numeric(estate[[input$var1]]), "Variable is not numeric")
       )
     }
-    
-    tout <- t.test(est_newdf$ttvalue, mu = input$num2)
-    
-    ttidy <- broom::tidy(tout)
-     
-    ttidy %>% 
-      select("P-value" = p.value, "Estimate" = estimate, "95% Lower" = conf.low, "95% Upper" = conf.high) ->
-      toutvalue
-    toutvalue
   })
   
   # plot
