@@ -178,7 +178,7 @@ server <- function(input, output, session) {
     p2
   })
 
-  # ols fluidrow
+  # ols
   # ols part: lm summary
   output$slm <- renderPrint({
     if(isTRUE(input$ols)){
