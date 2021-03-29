@@ -183,8 +183,8 @@ server <- function(input, output, session) {
 # ols part: lm summary
   output$slm <- renderPrint({
     if(isTRUE(input$ols)){
-      lmout <- lm(estate[[input$var3]] ~ estate[[input$var2]])
-      summary(lmout)
+      lmres <- lm(log(estate[[input$var3]]) ~ log(estate[[input$var2]]), data = estate)
+      print(summary(lmres), digits = 2)
     }
   })
   
