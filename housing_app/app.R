@@ -179,7 +179,7 @@ server <- function(input, output, session) {
     est_onlynum
   }, options = list(iDisplayLength = 10))
   
-# ols part
+# ols fluidrow
 # ols part: lm summary
   output$slm <- renderPrint({
     if(isTRUE(input$ols)){
