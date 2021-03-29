@@ -13,7 +13,7 @@ estate <- readr::read_csv("./data/estate.csv",
                           ))
 estate %>% 
   mutate(`Price($K)` = Price/1000) %>% 
-  mutate(AC = ifelse(AC == "1","AC","No AC")) %>% 
+  mutate(AC = as.factor(ifelse(AC == "1","AC","No AC"))) %>% 
   select(`Price($K)`, everything(), -Price) ->
   estate
 
@@ -167,6 +167,9 @@ server <- function(input, output, session) {
     } else if (is.factor(estate[[input$var2]]) && is.factor(estate[[input$var3]])){
       p2 <- p2 +
         geom_jitter()
+    } else if (is.factor(estate[[input$var2]]) && is.numeric(estate[[input$var3]])){
+      p2 <- p2 +
+        geom_boxplot()
     } else{
       p2 <- p2 +
         ggstance::geom_boxploth()
