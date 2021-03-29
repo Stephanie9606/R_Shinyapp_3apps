@@ -183,13 +183,29 @@ server <- function(input, output, session) {
 # ols part: lm summary
   output$slm <- renderPrint({
     if(isTRUE(input$ols)){
-      lmout <- lm(estate[[input$var2]] ~ estate[[input$var3]])
+      lmout <- lm(estate[[input$var3]] ~ estate[[input$var2]])
       summary(lmout)
     }
   })
   
+# ols part: residual plot
+  output$plot3 <- renderPlot({
+    if(isTRUE(input$ols)){
+      lmres <- lm(log(estate[[input$var3]]) ~ log(estate[[input$var2]]))
+      qplot(x = lmres$fitted, y = lmres$residuals)
+    }
+  })
   
   
+# ols part: QQ plot 
+  output$plot4 <- renderPlot({
+    if(isTRUE(input$ols)){
+      lmres <- lm(log(estate[[input$var3]]) ~ log(estate[[input$var2]]))
+      qplot(sample = lmres$residuals, geom = "qq") +
+        geom_qq_line()
+    }
+  })
+    
 }
 
 shinyApp(ui, server)
