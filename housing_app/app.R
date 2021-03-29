@@ -13,6 +13,7 @@ estate <- readr::read_csv("./data/estate.csv",
                           ))
 estate %>% 
   mutate(`Price($K)` = Price/1000) %>% 
+  mutate(AC = ifelse(AC == "1","AC","No AC")) %>% 
   select(`Price($K)`, everything(), -Price) ->
   estate
 
@@ -120,7 +121,7 @@ server <- function(input, output, session) {
         geom_histogram(bins = input$bins)
     } else {
       p1 <- p1 +
-        geom_bar(bins = input$bins)
+        geom_bar()
     }
     p1
   })
@@ -172,15 +173,9 @@ server <- function(input, output, session) {
     }
     p2
   })
-  
-# Third Tab
-  output$dynamic <- renderDataTable({
-    est_onlynum <- estate[ , purrr::map_lgl(estate, is.numeric)]
-    est_onlynum
-  }, options = list(iDisplayLength = 10))
-  
-# ols fluidrow
-# ols part: lm summary
+
+  # ols fluidrow
+  # ols part: lm summary
   output$slm <- renderPrint({
     if(isTRUE(input$ols)){
       lmres <- lm(log(estate[[input$var3]]) ~ log(estate[[input$var2]]), data = estate)
@@ -188,7 +183,7 @@ server <- function(input, output, session) {
     }
   })
   
-# ols part: residual plot
+  # ols part: residual plot
   output$plot3 <- renderPlot({
     if(isTRUE(input$ols)){
       lmres <- lm(log(estate[[input$var3]]) ~ log(estate[[input$var2]]))
@@ -200,7 +195,7 @@ server <- function(input, output, session) {
   })
   
   
-# ols part: QQ plot 
+  # ols part: QQ plot 
   output$plot4 <- renderPlot({
     if(isTRUE(input$ols)){
       lmres <- lm(log(estate[[input$var3]]) ~ log(estate[[input$var2]]))
@@ -211,7 +206,13 @@ server <- function(input, output, session) {
         geom_qq_line()
     }
   })
-    
+
+# Third Tab
+  output$dynamic <- renderDataTable({
+    est_onlynum <- estate[ , purrr::map_lgl(estate, is.numeric)]
+    est_onlynum
+  }, options = list(iDisplayLength = 10))
+  
 }
 
 shinyApp(ui, server)
