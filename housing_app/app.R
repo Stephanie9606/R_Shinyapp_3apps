@@ -192,7 +192,10 @@ server <- function(input, output, session) {
   output$plot3 <- renderPlot({
     if(isTRUE(input$ols)){
       lmres <- lm(log(estate[[input$var3]]) ~ log(estate[[input$var2]]))
-      qplot(x = lmres$fitted, y = lmres$residuals)
+      qplot(x = lmres$fitted, y = lmres$residuals,
+            main = "Residuals vs Fitted",
+            xlab = "x",
+            ylab = "y")
     }
   })
   
@@ -201,7 +204,10 @@ server <- function(input, output, session) {
   output$plot4 <- renderPlot({
     if(isTRUE(input$ols)){
       lmres <- lm(log(estate[[input$var3]]) ~ log(estate[[input$var2]]))
-      qplot(sample = lmres$residuals, geom = "qq") +
+      qplot(sample = lmres$residuals, geom = "qq",
+            main = "QQ Plot",
+            xlab = "theoretical",
+            ylab = "sample") +
         geom_qq_line()
     }
   })
