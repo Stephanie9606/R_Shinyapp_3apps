@@ -12,7 +12,7 @@ ui <- fluidPage(
 
 server <- function(input, output) {
     
-    # plotType
+    # plot type
     plotType <- function(x, type) {
         switch(input$plottype,
                "Density Plot" = geom_density(x, outline.type = "full"),
