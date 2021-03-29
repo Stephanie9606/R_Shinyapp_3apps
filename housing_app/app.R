@@ -26,7 +26,6 @@ library(shiny)
 ui <- fluidPage(
   titlePanel("EDA of Estate Data"),
   # main space
-  fluidRow(
   tabsetPanel(type = "tabs",
                 tabPanel("Univariate",
                          sidebarLayout(
@@ -43,7 +42,8 @@ ui <- fluidPage(
                          )
                 ),
                 tabPanel("Bivariate",
-                         sidebarLayout(
+                         fluidRow(
+                           sidebarLayout(
                            sidebarPanel(
                              varSelectInput("var2", "X Variable?", data = estate),
                              checkboxInput("log2", "Log_Transform?"), 
@@ -54,19 +54,20 @@ ui <- fluidPage(
                            mainPanel(
                              plotOutput("plot2")
                            )
+                         ),
+                         # log ols space
+                         fluidRow(column(4, verbatimTextOutput("slm")),
+                                  column(4, plotOutput("plot3")),
+                                  column(4, plotOutput("plot4"))
+                                  )
                          )
+                         
                 ),
                 tabPanel("Spreadsheet",
                   dataTableOutput("dynamic")
+                  )
                 )
-    )
-  ),
-  # log ols space
-  fluidRow(column(4, verbatimTextOutput("slm")),
-           column(4, plotOutput("plot3")),
-           column(4, plotOutput("plot4"))
-           )
-)
+  )
 
 
 server <- function(input, output, session) {
